@@ -23,19 +23,9 @@ ACTION_SURFACE = 'SURFACE'
 ACTION_MOVE = 'MOVE'
 
 
-def copy_board(board: []) -> []:
-    return [x[:] for x in board]
+def test_1():
+    return 1
 
-
-def distance(x1, y1, x2, y2) -> int:
-    return abs(int(x1) - int(x2)) + abs(int(y1) - int(y2))
-
-
-def get_sector(x, y) -> int:
-    sector_side_size = 5
-    x_sector_add = x // sector_side_size + 1
-    y_sector_add = y // sector_side_size * 3
-    return x_sector_add + y_sector_add
 
 def move_via_direction(start_x, start_y, direction: str, range) -> (int, int):
     if direction == 'N': return start_x, start_y - range
@@ -425,12 +415,12 @@ def get_initial_position(water_board: []) -> (int, int):
 
 
 def main():
-    water_board = create_water_board()
-    start_x, start_y = get_initial_position(water_board)
-    print(f'{start_x} {start_y}')
-
-    game = Game(water_board, start_x, start_y)
-    game.start()
+    # water_board = create_water_board()
+    # start_x, start_y = get_initial_position(water_board)
+    # print(f'{start_x} {start_y}')
+    pass
+    # game = Game(water_board, start_x, start_y)
+    # game.start()
 
 
 main()
