@@ -1,4 +1,58 @@
+import random
 import sys
+
+
+"""
+C00=2,2,2,2,2,2,2,2,2,2
+C01=104,16,16,2,2,2,2,2,2,108 (_,desc)
+C10=6,6,6,2,2,2,2,2,2,4
+C11=6,6,6,2,2,2,2,2,2,4
+---
+C000=14,14,14,2,2,2,2,2,2,6
+C001=104,16,16,2,2,2,2,2,2,108
+C011=104,16,16,2,2,2,2,2,2,108
+---
+C0010=104,16,16,2,2,2,2,2,2,108
+C0011=2,104,2,2,2,106,104,104,2
+C0011=2,4,104,2,2,2,2,2,2,2
+C0011=2,2,108,104,104,2,2,2,2,8
+---
+C0010=104,16,16,10,112,6,10,4,4,108
+C1010=6,22,22,22,10,10,8,4,4,8
+---
+C00100=104,16,16,10,112,6,10,4,4,108
+C00101=104,16,16,10,112,6,10,4,4,108
+----------
+# C3_IS_ACT_ON_DISTANCE_1 = False
+C3_IS_ACT_ON_DISTANCE_1 = True
+----------
+----------
+----------
+C0000=2,2,2,10,10,10,6,4,4,2
+C0010=104,16, 16,10,112,6, 10,4,  4,  108
+C0020=2,  104,2, 10,10, 18,18,106,106,2
+C0030=10,10, 18,18,106,106,2
+C0110=104,16, 16,2,114,110,114,106,106,108
+C0120=2,  104,2, 2,12,10,12,6,6,2
+"""
+
+C1_VALID_C = '_'  # high (>100) 2, 5, 7, 8, 9; low (<30): 1, 3, 6, 10
+# C1_VALID_C = '#'  # high (>100) 2, 5, 7, 8, 9; low (<30): 1, 3, 6, 10
+
+# C2_IS_ASCENDING = False
+C2_IS_ASCENDING = True
+
+# C3_MODE_AT_DISTANCE_1 = None
+C3_MODE_AT_DISTANCE_1 = 'E'                 # 10#_#_,11__#_,42#_#_
+# C3_MODE_AT_DISTANCE_1 = 'self'              # 10#_#_,44#_#_,70#_#_
+# C3_MODE_AT_DISTANCE_1 = 'self-except-#__#'
+
+C4_IS_RANDOM_BACKUP_MOVE = False
+# C4_IS_RANDOM_BACKUP_MOVE = True
+
+# C5_IS_ACT_ON_p__p = False
+# C5_IS_ACT_ON_p__p = True
+
 
 
 KEY = {' ': 'A', 'A': 'B', 'B': 'C', 'C': 'D', 'D': 'E', 'E': 'E'}
@@ -42,7 +96,6 @@ def main():
     board = create_board(width, height, ' ', border=' ')
     debug(f'board={len(board[0])}x{len(board)}')
 
-    new_move = 'E'
     turn = 0
     while True:
         i1 = input()
@@ -54,53 +107,50 @@ def main():
 
         p = [[0, 0]] * third_init_input
         d = [('', 0)] * (third_init_input - 1)
-        which_move = 4
         valid_moves = []
-        valid_c = '_'
-        if i1 == valid_c:
-            which_move = 0
+        if i1 == C1_VALID_C:
             valid_moves.append('A')
-        elif i2 == valid_c:
-            which_move = 1
+        if i2 == C1_VALID_C:
             valid_moves.append('B')
-        elif i3 == valid_c:
-            which_move = 2
+        if i3 == C1_VALID_C:
             valid_moves.append('C')
-        elif i4 == valid_c:
-            which_move = 3
+        if i4 == C1_VALID_C:
             valid_moves.append('D')
 
         for i in range(third_init_input):
             p[i] = [int(j) for j in input().split()]
             y, x = p[i]
-            if i == which_move:
-                new_move = KEY[board[y][x]]
-                board[y][x] = new_move
-            else:
-                board[y][x] = KEY[board[y][x]]
+            board[y][x] = KEY[board[y][x]]
 
-        min_move = 4, 99999
-        max_move = 4, -1
         for i in range(third_init_input - 1):
             d[i] = 'ABCDE'[i], abs(p[i][0] - p[4][0]) + abs(p[i][1] - p[4][1])
-            if d[i][1] < min_move[1]:
-                min_move = i, d[i][1]
-            if d[i][1] > max_move[1]:
-                max_move = i, d[i][1]
 
-        d.sort(key=lambda t: t[1], reverse=True)
+        d.sort(key=lambda t: t[1], reverse=not C2_IS_ASCENDING)
 
-        choice = 'E'
-        if d[3][1] != 1 or i_s == '#__#':
-            choice_int = 4
+        choice = random.choice(['A', 'B', 'C', 'D', 'E']) if C4_IS_RANDOM_BACKUP_MOVE else 'E'
+        if d[0 if C2_IS_ASCENDING else 3][1] == 1:
+            if C3_MODE_AT_DISTANCE_1 == 'E':
+                choice = 'E'
+            elif C3_MODE_AT_DISTANCE_1 == 'self-except-#__#':
+                if i_s == '#__#':
+                    for x in d:
+                        if x[0] in valid_moves:
+                            choice = x[0]
+                            break
+                else:
+                    choice = d[0 if C2_IS_ASCENDING else 3][0]
+            elif C3_MODE_AT_DISTANCE_1 == 'self':
+                choice = d[0 if C2_IS_ASCENDING else 3][0]
+            else:
+                for x in d:
+                    if x[0] in valid_moves:
+                        choice = x[0]
+                        break
+        else:
             for x in d:
-                # if x[0] in valid_moves:
-                if x[0]:
+                if x[0] in valid_moves:
                     choice = x[0]
-                    # choice_int = x[0]
                     break
-
-        # choice = 'ABCDE'[choice_int]
 
         debug(i_s)
         debug(f'choice={choice}')
