@@ -1,4 +1,4 @@
-(TODO: Perhaps move content from here to the 'dev' repo)
+(Update: Moved content from here to the 'dev' repo)
 
 # programming-competition
 My code related to various programming competitions
